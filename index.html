@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="description" content="Наведите камеру на изображение на виньетке и посмотрите видео в дополненной реальности." />
+
+  <title>AR Виньетка</title>
+
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/css/styles.css" />
+
+  <!--
+    Библиотеки грузятся с вашего сервера (assets/lib).
+    Если файла нет, libs-fallback.js подключает CDN.
+    Скачать файлы: bash scripts/download-libs.sh
+  -->
+  <script src="/assets/lib/aframe-1.4.2.min.js"></script>
+  <script src="/js/libs-fallback.js"
+          data-check="aframe"
+          data-cdn="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+
+  <script src="/assets/lib/mindar-image-aframe-1.2.5.prod.js"></script>
+  <script src="/js/libs-fallback.js"
+          data-check="mindar"
+          data-cdn="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+  <!-- Приложение (ES-модули, выполняются после разбора страницы) -->
+  <script type="module" src="/js/main.js"></script>
+</head>
+
+<body>
+  <!--
+    AR-сцена. Метки (a-entity) и плоскости для видео создаются в js/ar-scene.js
+    по списку targets из js/config.js.
+    ВАЖНО: imageTargetSrc здесь должен совпадать с CONFIG.targetsMindUrl.
+  -->
+  <div id="ar-container">
+    <a-scene
+      id="ar-scene"
+      color-space="sRGB"
+      renderer="colorManagement: true; physicallyCorrectLights: true; alpha: true"
+      vr-mode-ui="enabled: false"
+      device-orientation-permission-ui="enabled: false"
+      mindar-image="
+        imageTargetSrc: /assets/targets.mind;
+        autoStart: false;
+        uiLoading: no;
+        uiScanning: no;
+        uiError: no;
+        maxTrack: 1;
+        filterMinCF: 0.0005;
+        filterBeta: 1000;
+        missTolerance: 10;
+      "
+    >
+      <a-camera
+        position="0 0 0"
+        look-controls="enabled: false"
+        cursor="rayOrigin: mouse; fuse: false"
+      ></a-camera>
+    </a-scene>
+  </div>
+
+  <!-- Один видеоэлемент на все метки (id должен совпадать с CONFIG.videoElementId) -->
+  <div id="video-pool">
+    <video
+      id="ar-video"
+      playsinline
+      webkit-playsinline
+      loop
+      preload="none"
+      crossorigin="anonymous"
+    ></video>
+  </div>
+
+  <!-- Стартовая панель -->
+  <div id="controls">
+    <div id="start-panel">
+      <h1 data-i18n="panel.title">AR Виньетка</h1>
+      <p data-i18n="panel.text">
+        Разрешите доступ к камере и наведите её на специальное изображение на виньетке.
+      </p>
+
+      <div id="inapp-warning" hidden>
+        <p data-i18n="inapp.text">
+          Сайт открыт во встроенном браузере приложения. Камера там часто не работает.
+          Откройте ссылку в Chrome или Safari.
+        </p>
+        <div class="row">
+          <button id="copy-link" class="secondary" type="button" data-i18n="inapp.copy">Скопировать ссылку</button>
+          <a id="open-chrome" class="secondary" href="#" hidden data-i18n="inapp.chrome">Открыть в Chrome</a>
+        </div>
+      </div>
+
+      <button id="start-button" type="button" disabled>
+        <span class="spinner" aria-hidden="true"></span>
+        <span id="start-label" data-i18n="button.loading">Загрузка...</span>
+      </button>
+
+      <p id="panel-error" role="alert" hidden></p>
+    </div>
+  </div>
+
+  <button id="sound-button" type="button" hidden></button>
+
+  <div id="status" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

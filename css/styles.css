@@ -1,0 +1,251 @@
+/* ===== Переменные оформления (меняйте цвета и размеры здесь) ===== */
+:root {
+  --bg: #000;
+  --text: #fff;
+  --text-muted: #e5e5e5;
+
+  --panel-bg: rgba(0, 0, 0, 0.78);
+  --panel-border: rgba(255, 255, 255, 0.2);
+  --pill-bg: rgba(0, 0, 0, 0.7);
+
+  --accent-bg: #fff;
+  --accent-text: #111;
+
+  --error-bg: rgba(180, 30, 30, 0.35);
+  --error-text: #ffd7d7;
+
+  --warn-bg: rgba(255, 190, 40, 0.16);
+  --warn-border: rgba(255, 190, 40, 0.45);
+  --warn-text: #ffe9b0;
+
+  --radius-lg: 18px;
+  --radius-md: 10px;
+  --radius-pill: 20px;
+
+  --z-controls: 10;
+  --z-status: 11;
+  --z-sound: 12;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--bg);
+  font-family: Arial, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* ===== AR-сцена ===== */
+/* MindAR добавляет видео с камеры внутрь этого контейнера */
+#ar-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.a-enter-vr,
+.a-enter-ar {
+  display: none !important;
+}
+
+/* Общий видеоэлемент для всех меток (вне экрана, но в DOM) */
+#video-pool {
+  position: fixed;
+  left: -9999px;
+  top: 0;
+  width: 2px;
+  height: 2px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ===== Стартовая панель ===== */
+#controls {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-controls);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+  pointer-events: none;
+}
+
+#start-panel {
+  width: min(100%, 360px);
+  padding: 24px;
+  border-radius: var(--radius-lg);
+
+  text-align: center;
+  color: var(--text);
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+
+  pointer-events: auto;
+}
+
+#start-panel h1 {
+  margin: 0 0 12px;
+  font-size: 24px;
+}
+
+#start-panel p {
+  margin: 0 0 20px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+#start-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  width: 100%;
+  padding: 14px 20px;
+  border: 0;
+  border-radius: var(--radius-md);
+
+  background: var(--accent-bg);
+  color: var(--accent-text);
+
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#start-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+#panel-error {
+  margin: 14px 0 0 !important;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  font-size: 14px !important;
+  color: var(--error-text) !important;
+  background: var(--error-bg);
+}
+
+/* ===== Предупреждение о встроенном браузере ===== */
+#inapp-warning {
+  margin-bottom: 16px;
+  padding: 12px;
+  border-radius: 12px;
+  text-align: left;
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-border);
+}
+
+#inapp-warning p {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: var(--warn-text);
+}
+
+#inapp-warning .row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.secondary {
+  flex: 1 1 auto;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: var(--radius-md);
+
+  background: transparent;
+  color: var(--text);
+
+  font-size: 14px;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* ===== Кнопка звука и статус ===== */
+#sound-button {
+  position: fixed;
+  top: max(16px, env(safe-area-inset-top));
+  right: 16px;
+  z-index: var(--z-sound);
+
+  padding: 10px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-pill);
+
+  background: var(--pill-bg);
+  color: var(--text);
+
+  font-size: 14px;
+  cursor: pointer;
+}
+
+#status {
+  position: fixed;
+  left: 50%;
+  bottom: max(28px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: var(--z-status);
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  width: max-content;
+  max-width: calc(100% - 32px);
+
+  padding: 10px 16px;
+  border-radius: var(--radius-pill);
+
+  color: var(--text);
+  background: var(--pill-bg);
+
+  font-size: 14px;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* ===== Индикатор загрузки ===== */
+.spinner {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+#start-button .spinner {
+  border-color: rgba(0, 0, 0, 0.2);
+  border-top-color: var(--accent-text);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

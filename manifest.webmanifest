@@ -1,0 +1,14 @@
+{
+  "name": "AR Виньетка",
+  "short_name": "AR Виньетка",
+  "description": "Наведите камеру на изображение на виньетке и посмотрите видео в дополненной реальности.",
+  "lang": "ru",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
