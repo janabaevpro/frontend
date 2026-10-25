@@ -361,9 +361,10 @@ async function renderEditor(id) {
   };
 
   $("#rows").onchange = (e) => {
-    if (!e.target.dataset.up) return;
+    if (!("up" in e.target.dataset)) return; // data-up qiymatsiz atribut: dataset.up == ""
     const file = e.target.files[0];
     const row = rows[Number(e.target.closest(".target").dataset.i)];
+    e.target.value = ""; // bir xil faylni qayta tanlash mumkin bo'lsin
     if (!file) return;
     run(async () => {
       toast(`Yuklanmoqda: ${(file.size / 1048576).toFixed(1)} MB...`);
