@@ -5,7 +5,7 @@ import { VideoPlayer } from "./video-player.js";
 import { ArScene } from "./ar-scene.js";
 import { diagnoseCamera } from "./camera.js";
 import { registerServiceWorker } from "./pwa.js";
-import { syncTargets } from "./api.js";
+import { loadGroup, getGroupSlug } from "./api.js";
 import {
   isInApp,
   isAndroid,
@@ -103,20 +103,32 @@ if (!window.AFRAME) {
   ui.setButton(t("button.unavailable"), { disabled: true });
   ui.showError(t("error.libs"));
 } else {
-  syncTargets()
-    .then(() => ar.init())
-    .then(() => {
-      isReady = true;
-      ui.setButton(t("button.start"));
-    })
-    .catch((error) => {
-      console.error("Ошибка инициализации сцены:", error);
-      ui.setButton(t("button.unavailable"), { disabled: true });
-      ui.showError(t("error.libs"));
-    });
+  const slug = getGroupSlug();
+
+  if (!slug) {
+    ui.setButton(t("button.unavailable"), { disabled: true });
+    ui.showError(t("error.noGroup"));
+  } else {
+    loadGroup(slug)
+      .then((group) => {
+        document.title = group.name;
+        document.querySelector("#start-panel h1").textContent = group.name;
+        onLoad(() => prefetch(group.mind));
+        return ar.init(group.mind);
+      })
+      .then(() => {
+        isReady = true;
+        ui.setButton(t("button.start"));
+      })
+      .catch((error) => {
+        console.error("Ошибка инициализации сцены:", error);
+        ui.setButton(t("button.unavailable"), { disabled: true });
+        ui.showError(error.code === "not_found" ? t("error.groupNotFound") : t(error.code === "network" ? "error.network" : "error.libs"));
+      });
+  }
 
   setTimeout(() => {
-    if (!isReady) {
+    if (!isReady && getGroupSlug()) {
       ui.setButton(t("button.unavailable"), { disabled: true });
       ui.showError(t("error.sceneTimeout"));
     }
@@ -178,5 +190,4 @@ window.addEventListener("pagehide", () => {
   if (isStarted) ar.stop();
 });
 
-onLoad(() => prefetch(CONFIG.targetsMindUrl));
 registerServiceWorker(CONFIG.serviceWorkerUrl);

@@ -21,8 +21,20 @@ export class ArScene {
     this.onLost = null;
   }
 
-  /** Создаёт метки. Возвращает Promise, который выполнится, когда сцена готова. */
-  init() {
+  /** Подключает .mind группы и создаёт метки. Promise выполнится, когда сцена готова. */
+  init(mindUrl) {
+    this.scene.setAttribute("mindar-image", {
+      imageTargetSrc: mindUrl,
+      autoStart: false,
+      uiLoading: "no",
+      uiScanning: "no",
+      uiError: "no",
+      maxTrack: 1,
+      filterMinCF: 0.0005,
+      filterBeta: 1000,
+      missTolerance: 10
+    });
+
     const anchors = CONFIG.targets.map((target, index) => this._createTarget(target, index));
 
     this.scene.addEventListener("arError", () => {

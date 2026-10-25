@@ -6,7 +6,7 @@
  * Видео (/assets/videos/) здесь НЕ кэшируются: они грузятся через Range-запросы,
  * их кэширует сам браузер по заголовкам Cache-Control.
  */
-const VERSION = "v4";
+const VERSION = "v5";
 const CACHE = `ar-vinetka-${VERSION}`;
 
 const PRECACHE = [
@@ -26,7 +26,6 @@ const PRECACHE = [
   "/js/ar-scene.js",
   "/js/api.js",
   "/js/libs-fallback.js",
-  "/assets/targets.mind",
   "/assets/lib/aframe-1.4.2.min.js",
   "/assets/lib/mindar-image-aframe-1.2.5.prod.js"
 ];
@@ -88,6 +87,9 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+
+  // Админ-панель не кэшируем
+  if (url.pathname.startsWith("/admin")) return;
 
   // Видео и Range-запросы пропускаем
   if (request.headers.has("range")) return;

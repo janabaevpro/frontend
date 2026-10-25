@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>AR Vinetka · Admin</title>
+  <link rel="stylesheet" href="/admin/admin.css" />
+  <script type="module" src="/admin/admin.js"></script>
+</head>
+<body>
+  <section id="login" hidden>
+    <form id="login-form" class="card narrow">
+      <h1>Admin panel</h1>
+      <label>Admin token
+        <input id="token" type="password" autocomplete="current-password" required />
+      </label>
+      <p id="login-error" class="error" hidden></p>
+      <button class="primary" type="submit">Kirish</button>
+    </form>
+  </section>
+
+  <div id="app" hidden>
+    <header>
+      <a href="#/" class="brand">AR Vinetka · Admin</a>
+      <button id="logout" class="ghost" type="button">Chiqish</button>
+    </header>
+    <main id="view"></main>
+  </div>
+
+  <dialog id="qr-dialog">
+    <h2 id="qr-title"></h2>
+    <canvas id="qr-canvas"></canvas>
+    <p id="qr-url" class="muted"></p>
+    <div class="row">
+      <button id="qr-download" class="primary" type="button">PNG yuklab olish</button>
+      <button id="qr-copy" type="button">Havolani nusxalash</button>
+      <button id="qr-close" class="ghost" type="button">Yopish</button>
+    </div>
+  </dialog>
+
+  <div id="toast" role="status" hidden></div>
+</body>
+</html>

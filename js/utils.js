@@ -21,7 +21,8 @@ export function chromeIntentUrl() {
 export function track(event, data = {}) {
   if (!CONFIG.apiUrl) return;
   try {
-    const body = JSON.stringify({ event, ...data, t: Date.now() });
+    const group = location.pathname.match(/^\/g\/([a-z0-9-]+)/i)?.[1]?.toLowerCase();
+    const body = JSON.stringify({ event, group, ...data, t: Date.now() });
     // text/plain: простой запрос без CORS preflight; сервер читает его как JSON
     navigator.sendBeacon(`${CONFIG.apiUrl}/api/track`, new Blob([body], { type: "text/plain" }));
   } catch (e) {

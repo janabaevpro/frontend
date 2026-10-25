@@ -35,7 +35,7 @@
   <!--
     AR-сцена. Метки (a-entity) и плоскости для видео создаются в js/ar-scene.js
     по списку targets из js/config.js.
-    ВАЖНО: imageTargetSrc здесь должен совпадать с CONFIG.targetsMindUrl.
+    Компонент mindar-image добавляется из js/ar-scene.js: .mind берётся у backend для группы из адреса /g/<токен>.
   -->
   <div id="ar-container">
     <a-scene
@@ -44,17 +44,6 @@
       renderer="colorManagement: true; physicallyCorrectLights: true; alpha: true"
       vr-mode-ui="enabled: false"
       device-orientation-permission-ui="enabled: false"
-      mindar-image="
-        imageTargetSrc: /assets/targets.mind;
-        autoStart: false;
-        uiLoading: no;
-        uiScanning: no;
-        uiError: no;
-        maxTrack: 1;
-        filterMinCF: 0.0005;
-        filterBeta: 1000;
-        missTolerance: 10;
-      "
     >
       <a-camera
         position="0 0 0"
