@@ -36,6 +36,8 @@ export async function loadGroup(slug, timeoutMs = 40000) {
     throw fail("bad_data");
   }
 
-  CONFIG.targets = sorted.map(({ video, width }) => (width ? { video, width } : { video }));
+  // Bazadagi video: "/api/videos/5" -> backend manzili bilan
+  const abs = (v) => (v.startsWith("/api/") ? `${CONFIG.apiUrl}${v}` : v);
+  CONFIG.targets = sorted.map(({ video, width }) => (width ? { video: abs(video), width } : { video: abs(video) }));
   return { name: data.name, mind: `${CONFIG.apiUrl}${data.mind}` };
 }

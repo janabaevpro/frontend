@@ -4,6 +4,7 @@ const API = CONFIG.apiUrl;
 const $ = (s, r = document) => r.querySelector(s);
 const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const MAX_TARGETS = 30;
+const MAX_VIDEO_MB = 100; // server o'zi ham tekshiradi (bazada 25 MB, Bunny'da 100 MB)
 
 /* ---------- Umumiy yordamchilar ---------- */
 let token = sessionStorage.getItem("adminToken") || "";
@@ -14,7 +15,7 @@ function toast(msg, isErr = false) {
   el.className = isErr ? "err" : "";
   el.hidden = false;
   clearTimeout(toast.t);
-  toast.t = setTimeout(() => (el.hidden = true), isErr ? 6000 : 2500);
+  toast.t = setTimeout(() => (el.hidden = true), isErr ? 15000 : 2500);
 }
 
 async function api(path, { method = "GET", body } = {}) {
@@ -25,8 +26,8 @@ async function api(path, { method = "GET", body } = {}) {
       headers: { Authorization: `Bearer ${token}`, ...(body ? { "Content-Type": "application/json" } : {}) },
       body: body ? JSON.stringify(body) : undefined
     });
-  } catch {
-    throw new Error("Serverga ulanib bo'lmadi (Render uyg'onayotgan bo'lishi mumkin, 30-40 soniya kuting)");
+  } catch (e) {
+    throw new Error(`Serverga ulanib bo'lmadi.\nManzil: ${API || "(apiUrl bo'sh!)"}\nBrauzer xatosi: ${e.message}\n(Render uxlab yotgan bo'lsa 30-40 soniya kuting va qayta urining; F12 → Console da sabab ko'rinadi)`);
   }
   if (res.status === 401) {
     logout();
@@ -247,6 +248,25 @@ async function compileMind(images, onProgress) {
   return compiler.exportData();
 }
 
+/** MP4 ni bazaga yuklaydi, "/api/videos/<id>" qaytaradi. */
+async function uploadVideo(groupId, file) {
+  if (!/\.mp4$/i.test(file.name) && file.type !== "video/mp4") throw new Error("Faqat MP4 fayl (H.264) yuklang");
+  if (file.size > MAX_VIDEO_MB * 1024 * 1024) throw new Error(`Video ${MAX_VIDEO_MB} MB dan oshmasin (hozir ${(file.size / 1048576).toFixed(1)} MB). Siqing: 720p, ~2 Mbps`);
+  let res;
+  try {
+    res = await fetch(`${API}/api/admin/groups/${groupId}/video`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "video/mp4", "X-Filename": encodeURIComponent(file.name) },
+      body: file
+    });
+  } catch {
+    throw new Error("Video yuklanmadi: serverga ulanib bo'lmadi");
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.errors?.join("\n") || `Video yuklanmadi (${res.status})`);
+  return data.url;
+}
+
 async function renderEditor(id) {
   const view = $("#view");
   view.innerHTML = `<p class="muted">Yuklanmoqda...</p>`;
@@ -308,7 +328,12 @@ async function renderEditor(id) {
             <span class="row"><button data-act="up" ${i ? "" : "disabled"}>↑</button><button data-act="down" ${i < rows.length - 1 ? "" : "disabled"}>↓</button><button data-act="del" class="danger">✕</button></span>
           </div>
           <div class="inputs">
-            <input class="wide" type="url" data-f="videoUrl" placeholder="Video havolasi (https://...mp4)" value="${esc(r.videoUrl)}" />
+            <input class="wide" type="text" data-f="videoUrl" placeholder="Video havolasi (https://...mp4) yoki pastdan MP4 yuklang" value="${esc(r.videoUrl)}" />
+            <div class="wide row">
+              <button data-act="upload" type="button">📁 Video yuklash (MP4)</button>
+              <input type="file" data-up accept="video/mp4,.mp4" hidden />
+              ${r.videoUrl.startsWith("/api/videos/") ? `<span class="badge ok">bazada saqlangan</span>` : ""}
+            </div>
             <input type="text" data-f="title" placeholder="Sarlavha (ixtiyoriy)" value="${esc(r.title)}" />
             <input type="number" data-f="width" step="0.1" min="0.1" max="10" placeholder="Kenglik" value="${esc(r.width)}" />
           </div>
@@ -325,6 +350,7 @@ async function renderEditor(id) {
     const act = e.target.dataset.act;
     if (!act) return;
     const i = Number(e.target.closest(".target").dataset.i);
+    if (act === "upload") return e.target.closest(".target").querySelector("[data-up]").click();
     if (act === "del") rows.splice(i, 1);
     else {
       const j = act === "up" ? i - 1 : i + 1;
@@ -332,6 +358,19 @@ async function renderEditor(id) {
     }
     photosDirty = true;
     drawRows();
+  };
+
+  $("#rows").onchange = (e) => {
+    if (!e.target.dataset.up) return;
+    const file = e.target.files[0];
+    const row = rows[Number(e.target.closest(".target").dataset.i)];
+    if (!file) return;
+    run(async () => {
+      toast(`Yuklanmoqda: ${(file.size / 1048576).toFixed(1)} MB...`);
+      row.videoUrl = await uploadVideo(id, file);
+      drawRows();
+      toast("Video yuklandi. «Saqlash» ni bosishni unutmang");
+    });
   };
 
   $("#add-photos").onclick = () => $("#photo-input").click();

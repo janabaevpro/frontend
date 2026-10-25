@@ -29,7 +29,7 @@ button.ghost { background: none; border-color: transparent; }
 .row.space { justify-content: space-between; }
 .grow { flex: 1; min-width: 160px; }
 .muted { color: var(--muted); font-size: 13px; }
-.error { color: var(--danger); margin: 0; }
+.error { color: var(--danger); margin: 0; white-space: pre-line; }
 .badge { font-size: 12px; padding: 2px 8px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); }
 .badge.ok { color: var(--ok); border-color: var(--ok); }
 .badge.warn { color: var(--warn); border-color: var(--warn); }
